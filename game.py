@@ -1,3 +1,4 @@
+from turtle import back
 from pygame import *
 from math import *
 
@@ -15,6 +16,11 @@ running=True
 myClock = time.Clock()
 
 levels = [[[],[],[]]]
+platform = image.load("purpleplatform_tintedcropped.png")
+platform = transform.scale(platform,(200,50))
+background = image.load("background.jpg")
+background = transform.scale(background, (1000,800))
+
 
 class Entity:
     def __init__(self, x, y):
@@ -113,14 +119,16 @@ class Level():
         return(self.square)
 
     def draw(self):
-        for platform in levels[self.currentLevel][self.getSquare(player.posY)]:
-            draw.rect(screen, RED, platform)
+        for platformIn in levels[self.currentLevel][self.getSquare(player.posY)]:
+            screen.blit(platform, (platformIn[0],platformIn[1]))
 
 player = Entity(20, 780)
 level = Level()
 
 while running:
-    screen.fill((255, 255, 255))
+    
+    # screen.fill((255, 255, 255))
+    screen.blit(background, (0,0))
 
     mx,my=mouse.get_pos()
     mb=mouse.get_pressed()
@@ -133,7 +141,9 @@ while running:
                 player.jumping = True
         if evt.type == MOUSEBUTTONDOWN:
             if evt.button == 1:
-                levels[0][level.getSquare(player.posY)].append((mx, my, 100, 50))
+                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 200, 50))
+            if evt.button == 2:
+                print(levels)
 
     player.movePlayer()
     level.draw()
