@@ -1,4 +1,3 @@
-from turtle import back
 from pygame import *
 from math import *
 
@@ -80,9 +79,7 @@ class Entity:
             self.posY += self.vy
             self.falling = False
             if level.getSquare(self.posY) == 0 and self.posY > 780:
-                print(self.posY)
                 self.posY = 780
-                print("THIS RAN")
                 self.jumping = False
                 self.grounded = True
                 self.vy = -8
@@ -101,7 +98,7 @@ class Entity:
                             self.vy = 1
                         break
         
-        draw.circle(screen, GREEN, (player.posX, player.posY), 20)
+        draw.circle(screen, RED, (player.posX, player.posY), 20)
 
 class Level():
     def __init__(self):
