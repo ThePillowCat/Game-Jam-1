@@ -30,6 +30,7 @@ class Entity:
         self.jumping = False
         self.falling = False
         self.grounded = True
+        self.radius = 40
 
     def movePlayer(self):
 
@@ -42,9 +43,9 @@ class Entity:
             self.gravityVy += 0.125
             self.posY += self.gravityVy
 
-        if (level.getSquare(player.posY) == 0 and self.posY >= 780):
+        if (level.getSquare(player.posY) == 0 and self.posY > height-player.radius):
             self.grounded = True
-            self.posY = 780
+            self.posY = height-player.radius
             self.gravityVy = 1
             self.falling = False
 
@@ -78,8 +79,8 @@ class Entity:
             self.vy += 0.25
             self.posY += self.vy
             self.falling = False
-            if level.getSquare(self.posY) == 0 and self.posY > 780:
-                self.posY = 780
+            if level.getSquare(self.posY) == 0 and self.posY > height-player.radius:
+                self.posY = height-player.radius
                 self.jumping = False
                 self.grounded = True
                 self.vy = -8
@@ -98,7 +99,7 @@ class Entity:
                             self.vy = 1
                         break
         
-        draw.circle(screen, RED, (player.posX, player.posY), 20)
+        draw.circle(screen, RED, (player.posX, player.posY), player.radius)
 
 class Level():
     def __init__(self):
@@ -119,7 +120,7 @@ class Level():
         for platformIn in levels[self.currentLevel][self.getSquare(player.posY)]:
             screen.blit(platform, (platformIn[0],platformIn[1]))
 
-player = Entity(20, 780)
+player = Entity(20, 760)
 level = Level()
 
 while running:
