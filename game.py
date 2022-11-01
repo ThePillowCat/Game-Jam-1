@@ -30,7 +30,7 @@ class Entity:
         self.jumping = False
         self.falling = False
         self.grounded = True
-        self.radius = 40
+        self.radius = 20
 
     def movePlayer(self):
 
