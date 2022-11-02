@@ -42,11 +42,16 @@ class Entity:
         keys = key.get_pressed()
 
         if keys[K_w]:
-            self.posY-=5
-            self.climbing = True
-            self.jumping = False
-            self.falling = False
-            self.vy = -8
+            for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
+                r1 = Rect(self.posX, self.posY, player.width, player.height+2)
+                r2 = Rect(platform)
+                if Rect.colliderect(r1, r2):
+                    if platform[2] == 50:
+                        self.posY-=5
+                        self.climbing = True
+                        self.jumping = False
+                        self.falling = False
+                        self.vy = -8
 
         if not self.jumping and not self.climbing:
             self.falling = True
@@ -62,7 +67,7 @@ class Entity:
         for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
             r1 = Rect(self.posX, self.posY, player.width, player.height+2)
             r2 = Rect(platform)
-            if Rect.colliderect(r1, r2):
+            if Rect.colliderect(r1, r2) and platform[2] != 50:
                 if (r2[1] < r1[1]+player.height < r2[1]+r2[3]):
                     self.posY = r2[1]-player.height
                     self.grounded = True
@@ -75,7 +80,7 @@ class Entity:
             for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
                 r1 = Rect(self.posX, self.posY, player.width, player.height)
                 r2 = Rect(platform)
-                if Rect.colliderect(r1, r2) or self.posX < 0:
+                if (Rect.colliderect(r1, r2) or self.posX < 0) and platform[2] != 50:
                     self.posX += 5
 
         if keys[K_d]:
@@ -83,8 +88,9 @@ class Entity:
             for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
                 r1 = Rect(self.posX, self.posY, player.width, player.height)
                 r2 = Rect(platform)
-                if Rect.colliderect(r1, r2) or self.posX+player.width > width:
+                if (Rect.colliderect(r1, r2) or self.posX+player.width > width) and platform[2] != 50:
                     self.posX -= 5
+
         if self.jumping:
             self.vy += 0.25
             self.posY += self.vy
@@ -98,7 +104,7 @@ class Entity:
                 for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
                     r1 = Rect(self.posX, self.posY, player.width, player.height+2)
                     r2 = Rect(platform)
-                    if Rect.colliderect(r1, r2):
+                    if Rect.colliderect(r1, r2) and platform[2] != 50:
                         if r2[1] < r1[1]+player.height+2 < r2[1]+r2[3]:
                             self.posY = r2[1]-player.height
                             self.vy = -8
@@ -130,7 +136,10 @@ class Level():
 
     def draw(self):
         for platformIn in levels[self.currentLevel][self.getSquare(player.posY)]:
-            screen.blit(platform, (platformIn[0],platformIn[1]))
+            if platformIn[2] == 50:
+                screen.blit(ladder,(platformIn[0],platformIn[1]))
+            else:
+                screen.blit(platform, (platformIn[0],platformIn[1]))
 
 class Gun():
     def __init__(self):
@@ -147,7 +156,7 @@ gun = Gun()
 while running:
 
     screen.blit(background, (0,0))
-    screen.blit(ladder,(0,0))
+
     mx,my=mouse.get_pos()
     mb=mouse.get_pressed()
 
@@ -159,15 +168,16 @@ while running:
                 player.jumping = True
         if evt.type == MOUSEBUTTONDOWN:
             if evt.button == 1:
-                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 50, 200))
+                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 200, 50))
             if evt.button == 2:
                 print(levels)
             if evt.button == 3:
-                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 200, 50))
+                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 50, 200))
 
-    player.movePlayer()
     level.draw()
+    player.movePlayer()
     gun.drawGun()
+
     myClock.tick(60)
     display.flip()
             
