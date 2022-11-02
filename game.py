@@ -28,16 +28,25 @@ class Entity:
         self.jumping = False
         self.falling = False
         self.grounded = True
-        self.width = 100
-        self.height = 40
+        self.climbing = False
+        self.width = 40
+        self.height = 80
         self.posX = x
         self.posY = height - self.height
     def movePlayer(self):
 
+        self.climbing = False
+        self.grounded = False
         keys = key.get_pressed()
 
-        self.grounded = False
-        if not self.jumping:
+        if keys[K_w]:
+            self.posY-=5
+            self.climbing = True
+            self.jumping = False
+            self.falling = False
+            self.vy = -8
+
+        if not self.jumping and not self.climbing:
             self.falling = True
             self.gravityVy += 0.125
             self.posY += self.gravityVy
@@ -57,6 +66,7 @@ class Entity:
                     self.grounded = True
                     self.falling = False
                     self.gravityVy = 1
+                    self.climbing = False
 
         if keys[K_a]:
             self.posX -= 5
@@ -120,8 +130,17 @@ class Level():
         for platformIn in levels[self.currentLevel][self.getSquare(player.posY)]:
             screen.blit(platform, (platformIn[0],platformIn[1]))
 
+class Gun():
+    def __init__(self):
+        self.width = 50
+        self.height = 20
+        pass
+    def drawGun(self):
+        draw.rect(screen,GREEN,(player.posX+player.width, player.posY+player.height/2, self.width, self.height))
+
 player = Entity(100)
 level = Level()
+gun = Gun()
 
 while running:
 
@@ -138,12 +157,15 @@ while running:
                 player.jumping = True
         if evt.type == MOUSEBUTTONDOWN:
             if evt.button == 1:
-                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 200, 50))
+                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 50, 200))
             if evt.button == 2:
                 print(levels)
+            if evt.button == 3:
+                levels[level.currentLevel][level.getSquare(player.posY)].append((mx, my, 200, 50))
 
     player.movePlayer()
     level.draw()
+    gun.drawGun()
     myClock.tick(60)
     display.flip()
             
