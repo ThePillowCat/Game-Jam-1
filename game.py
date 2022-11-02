@@ -17,6 +17,8 @@ myClock = time.Clock()
 levels = [[[],[],[]]]
 platform = image.load("purpleplatform_tintedcropped.png")
 platform = transform.scale(platform,(200,50))
+ladder = image.load("ladder.png")
+ladder = transform.scale(ladder,(50,200))
 background = image.load("background.jpg")
 background = transform.scale(background, (1000,800))
 
@@ -145,7 +147,7 @@ gun = Gun()
 while running:
 
     screen.blit(background, (0,0))
-
+    screen.blit(ladder,(0,0))
     mx,my=mouse.get_pos()
     mb=mouse.get_pressed()
 
