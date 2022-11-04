@@ -22,6 +22,9 @@ ladder = transform.scale(ladder,(50,200))
 background = image.load("background.jpg")
 background = transform.scale(background, (1000,800))
 
+playerImage = image.load("transparentastronaut_2.png")
+playerImageLeft = transform.flip(playerImage, True, False)
+
 class Entity:
     def __init__(self, x):
         self.vy = -8
@@ -36,6 +39,7 @@ class Entity:
         self.posY = height - self.height
         self.movedLeft = False
         self.movedRight = False
+        self.facing = "Right"
         
     def movePlayer(self):
 
@@ -49,10 +53,12 @@ class Entity:
         if keys[K_a]:
             self.posX -= 5
             self.movedLeft = True
+            self.facing = "Left"
             
         if keys[K_d]:
             self.posX += 5
             self.movedRight = True
+            self.facing = "Right"
         
         if self.jumping:
             self.vy += 0.25
@@ -122,7 +128,12 @@ class Entity:
                 self.gravityVy = 1
                 self.grounded = True
         
-        draw.ellipse(screen, RED, (self.posX, self.posY, self.width, self.height))
+        #draw.ellipse(screen, RED, (self.posX, self.posY, self.width, self.height))
+        if self.facing == "Right":
+            screen.blit(playerImageLeft, (self.posX, self.posY+5))
+            # draw.rect(screen,GREEN,(player.posX+player.width, player.posY+player.height/2, 10, 5))
+        else:
+            screen.blit(playerImage, (self.posX, self.posY+5))
 
 class Level():
     def __init__(self):
@@ -179,7 +190,7 @@ while running:
 
     level.draw()
     player.movePlayer()
-    gun.drawGun()
+    #gun.drawGun()
 
     myClock.tick(60)
     display.flip()
