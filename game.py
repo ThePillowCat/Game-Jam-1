@@ -22,7 +22,6 @@ ladder = transform.scale(ladder,(50,200))
 background = image.load("background.jpg")
 background = transform.scale(background, (1000,800))
 
-
 class Entity:
     def __init__(self, x):
         self.vy = -8
@@ -35,88 +34,95 @@ class Entity:
         self.height = 80
         self.posX = x
         self.posY = height - self.height
+        self.movedLeft = False
+        self.movedRight = False
+        
     def movePlayer(self):
 
         self.climbing = False
+        self.movedLeft = False
+        self.movedRight = False
         self.grounded = False
+        
         keys = key.get_pressed()
 
-        if keys[K_w]:
-            for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
-                r1 = Rect(self.posX, self.posY, player.width, player.height+2)
-                r2 = Rect(platform)
-                if Rect.colliderect(r1, r2):
-                    if platform[2] == 50:
+        if keys[K_a]:
+            self.posX -= 5
+            self.movedLeft = True
+            
+        if keys[K_d]:
+            self.posX += 5
+            self.movedRight = True
+        
+        if self.jumping:
+            self.vy += 0.25
+            self.posY += self.vy
+            self.falling = False
+            self.grounded = False
+
+        if level.getSquare(self.posY) == 0 and self.posY >= height-player.height:
+            self.posY = height-player.height
+            self.jumping = False
+            self.grounded = True
+            self.vy = -8
+        
+        for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
+            #platform and player
+            r1 = Rect(self.posX, self.posY, self.width, self.height)
+            r2 = Rect(platform)
+            #rectangles for different parts of platforms
+            topPlat = Rect(platform[0], platform[1], platform[2], 7)
+            leftPlat = Rect(platform[0], platform[1], 1, platform[3])
+            rightPlat = Rect(platform[0]+platform[2], platform[1], 1, platform[3])
+            bottomPlat = Rect(platform[0]+3, platform[1]+platform[3]-7, platform[2]-6, 7)
+            #rectangles for different parts of player
+            bottomPlayer = Rect(self.posX, self.posY+(self.height-2), self.width, 5)
+            topPlayer = Rect(self.posX+3, self.posY-2, player.width-3, 2)
+
+            if (Rect.colliderect(r1, r2)):
+                if platform[2] == 50:
+                    if keys[K_w]:
                         self.posY-=5
                         self.climbing = True
                         self.jumping = False
                         self.falling = False
                         self.vy = -8
+                        self.gravityVy = 1
 
-        if not self.jumping and not self.climbing:
-            self.falling = True
-            self.gravityVy += 0.125
-            self.posY += self.gravityVy
-
-        if (level.getSquare(player.posY) == 0 and self.posY > height-player.height):
-            self.grounded = True
-            self.posY = height-player.height
-            self.gravityVy = 1
-            self.falling = False
-
-        for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
-            r1 = Rect(self.posX, self.posY, player.width, player.height+2)
-            r2 = Rect(platform)
-            if Rect.colliderect(r1, r2) and platform[2] != 50:
-                if (r2[1] < r1[1]+player.height < r2[1]+r2[3]):
-                    self.posY = r2[1]-player.height
-                    self.grounded = True
-                    self.falling = False
-                    self.gravityVy = 1
-                    self.climbing = False
-
-        if keys[K_a]:
-            self.posX -= 5
-            for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
-                r1 = Rect(self.posX, self.posY, player.width, player.height)
-                r2 = Rect(platform)
-                if (Rect.colliderect(r1, r2) or self.posX < 0) and platform[2] != 50:
-                    self.posX += 5
-
-        if keys[K_d]:
-            self.posX += 5
-            for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
-                r1 = Rect(self.posX, self.posY, player.width, player.height)
-                r2 = Rect(platform)
-                if (Rect.colliderect(r1, r2) or self.posX+player.width > width) and platform[2] != 50:
-                    self.posX -= 5
-
-        if self.jumping:
-            self.vy += 0.25
-            self.posY += self.vy
-            self.falling = False
-            if level.getSquare(self.posY) == 0 and self.posY > height-player.height:
-                self.posY = height-player.height
-                self.jumping = False
-                self.grounded = True
+            if Rect.colliderect(bottomPlayer, topPlat):
+                self.falling = False
+                self.posY = r2[1]-player.height-1
                 self.vy = -8
-            else: 
-                for platform in levels[level.currentLevel][level.getSquare(player.posY)]:
-                    r1 = Rect(self.posX, self.posY, player.width, player.height+2)
-                    r2 = Rect(platform)
-                    if Rect.colliderect(r1, r2) and platform[2] != 50:
-                        if r2[1] < r1[1]+player.height+2 < r2[1]+r2[3]:
-                            self.posY = r2[1]-player.height
-                            self.vy = -8
-                            self.jumping = False
-                            self.falling = False
-                            self.grounded = True
-                        else:
-                            #runs if hit bottom of rect
+                self.jumping = False
+                self.falling = False
+                self.grounded = True
+
+            if self.jumping:
+                if platform[2] != 50:
+                    if (Rect.colliderect(r1, r2)):
+                        if Rect.colliderect(bottomPlat, topPlayer):
+                            self.posY = r2[1]+r2[3]-1
                             self.vy = 1
-                        break
+
+            if platform[2] != 50:
+                if (Rect.colliderect(r1, rightPlat)) and self.movedLeft:
+                    self.posX+=5
+                    self.movedLeft = False
+                if (Rect.colliderect(r1, leftPlat)) and self.movedRight:
+                    self.posX-=5
+                    self.movedRight = False
         
-        draw.ellipse(screen, RED, (player.posX, player.posY, player.width, player.height))
+        if not self.jumping and not self.climbing and not self.grounded:
+            self.falling = True
+            self.gravityVy+=0.125
+            self.posY += self.gravityVy
+            if level.getSquare(self.posY) == 0 and self.posY >= height-player.height:
+                self.posY = height-player.height
+                self.falling = False
+                self.gravityVy = 1
+                self.grounded = True
+        
+        draw.ellipse(screen, RED, (self.posX, self.posY, self.width, self.height))
 
 class Level():
     def __init__(self):
@@ -130,8 +136,6 @@ class Level():
         elif y > height and self.square > 0:
             self.square-=1
             player.posY = 30
-            player.grounded = False
-            print("yo")
         return(self.square)
 
     def draw(self):
@@ -145,7 +149,6 @@ class Gun():
     def __init__(self):
         self.width = 50
         self.height = 20
-        pass
     def drawGun(self):
         draw.rect(screen,GREEN,(player.posX+player.width, player.posY+player.height/2, self.width, self.height))
 
